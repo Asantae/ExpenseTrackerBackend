@@ -49,3 +49,4 @@ tmp/
 # Logs and reports
 *.log
 *.stackdump
+*.env

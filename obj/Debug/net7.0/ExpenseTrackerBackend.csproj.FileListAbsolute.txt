@@ -116,3 +116,5 @@ C:\Users\Asantae\Desktop\Dev\ExpenseTrackerBackend\obj\Debug\net7.0\refint\Expen
 C:\Users\Asantae\Desktop\Dev\ExpenseTrackerBackend\obj\Debug\net7.0\ExpenseTrackerBackend.pdb
 C:\Users\Asantae\Desktop\Dev\ExpenseTrackerBackend\obj\Debug\net7.0\ExpenseTrackerBackend.genruntimeconfig.cache
 C:\Users\Asantae\Desktop\Dev\ExpenseTrackerBackend\obj\Debug\net7.0\ref\ExpenseTrackerBackend.dll
+C:\Users\Asantae\Desktop\Dev\ExpenseTrackerBackend\bin\Debug\net7.0\DotNetEnv.dll
+C:\Users\Asantae\Desktop\Dev\ExpenseTrackerBackend\bin\Debug\net7.0\Sprache.dll
