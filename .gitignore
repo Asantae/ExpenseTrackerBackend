@@ -1,0 +1,51 @@
+# .NET build output
+bin/
+obj/
+
+# User-specific files
+.idea/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.swp
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# SQLite database files
+*.db
+*.sqlite
+
+# JetBrains Rider files
+.idea/
+
+# ASP.NET Core generated files
+wwwroot/
+node_modules/
+
+# DotNet publish output
+publish/
+
+# Temporary ASP.NET files
+tmp/
+
+# Local development files for Visual Studio (Windows)
+.vs/
+.vscode/
+
+# User-specific configuration files for Visual Studio
+.vsconfig
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Logs and reports
+*.log
+*.stackdump
