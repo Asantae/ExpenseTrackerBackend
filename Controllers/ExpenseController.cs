@@ -12,7 +12,6 @@ public class ExpenseController : ControllerBase
 
     public ExpenseController()
     {
-        // Load environment variables from the .env file
         Env.Load();
         connectionString = Env.GetString("CONNECTION_STRING");
     }
