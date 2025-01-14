@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ExpenseTrackerBackend.Models;
-using System;
-using System.Linq;
-using System.Collections.Generic;
+using ExpenseTrackerBackend.Repositories;
+using ExpenseTrackerBackend.Utilities;
 using DotNetEnv;
-using Microsoft.IdentityModel.Tokens;
+using System;
 
 namespace ExpenseTrackerBackend.Controllers
 {
@@ -12,17 +11,20 @@ namespace ExpenseTrackerBackend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private string connectionString;
-        private readonly IConfiguration _config;
+        private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly UserRepository _userRepository;
 
         public UserController(IConfiguration config)
         {
             Env.Load();
-            connectionString = Env.GetString("CONNECTION_STRING");
-            _config=config;
+            string connectionString = Env.GetString("CONNECTION_STRING");
+
+            string secretKey = config.GetSection("Appsettings:SecretKey").Value;
+            string issuer = config.GetSection("Appsettings:Issuer").Value;
+            _jwtTokenGenerator = new JwtTokenGenerator(secretKey, issuer);
+
+            _userRepository = new UserRepository(connectionString);
         }
-        
-        private static List<User> mockUsers = new List<User>();
 
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegistrationRequest request)
@@ -32,8 +34,7 @@ namespace ExpenseTrackerBackend.Controllers
                 return BadRequest("Username and Password are required.");
             }
 
-            var existingUser = mockUsers.FirstOrDefault(u => u.Username == request.Username);
-            if (existingUser != null)
+            if (_userRepository.IsUsernameTaken(request.Username))
             {
                 return Conflict("User already exists.");
             }
@@ -47,7 +48,7 @@ namespace ExpenseTrackerBackend.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            mockUsers.Add(user);
+            _userRepository.AddUser(user);
 
             return Ok(new { Message = "User registered successfully.", UserId = user.Id });
         }
@@ -55,13 +56,13 @@ namespace ExpenseTrackerBackend.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserLoginRequest request)
         {
-            var user = mockUsers.FirstOrDefault(u => u.Username == request.Username && u.Password == request.Password);
-            if (user == null)
+            var user = _userRepository.GetUserByUsername(request.Username);
+            if (user == null || user.Password != request.Password)
             {
                 return Unauthorized("Invalid username or password.");
             }
 
-            var token = Guid.NewGuid().ToString();
+            var token = _jwtTokenGenerator.GenerateToken(user.Id.ToString(), user.Username);
 
             return Ok(new { Message = "Login successful.", Token = token });
         }
@@ -77,9 +78,9 @@ namespace ExpenseTrackerBackend.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            mockUsers.Add(guest);
+            _userRepository.AddUser(guest);
 
-            var token = Guid.NewGuid().ToString(); 
+            var token = _jwtTokenGenerator.GenerateToken(guest.Id.ToString(), guest.Username);
             return Ok(new { Message = "Logged in as guest.", Token = token });
         }
     }
