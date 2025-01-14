@@ -1,52 +1,40 @@
-# .NET build output
+# Ignore build output and intermediate files
 bin/
 obj/
 
-# User-specific files
-.idea/
-.vscode/
+# Ignore project user-specific files
 *.user
-*.userosscache
 *.suo
-*.swp
 
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
+# Ignore NuGet packages and cache
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+*.nuget.cache
 
-# SQLite database files
+# Ignore application settings
+appsettings.*.json
+
+# Ignore Rider IDE files
+.idea/
+*.sln.iml
+
+# Ignore Visual Studio Code settings
+.vscode/
+
+# Ignore logs and debug information
+*.log
+*.tlog
+
+# Ignore database files (if applicable)
 *.db
 *.sqlite
 
-# JetBrains Rider files
-.idea/
-
-# ASP.NET Core generated files
-wwwroot/
-node_modules/
-
-# DotNet publish output
-publish/
-
-# Temporary ASP.NET files
-tmp/
-
-# Local development files for Visual Studio (Windows)
-.vs/
-.vscode/
-
-# User-specific configuration files for Visual Studio
-.vsconfig
-
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-
-# Logs and reports
-*.log
-*.stackdump
-*.env
+# Ignore others
+*.pdb
+*.cache
+*.deps.json
+*.runtimeconfig.json
+*.dll
+*.exe

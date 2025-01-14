@@ -29,22 +29,29 @@ namespace ExpenseTrackerBackend.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] UserRegistrationRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Email))
             {
-                return BadRequest("Username and Password are required.");
+                return BadRequest("Username, Password, and Email are required.");
             }
 
             if (_userRepository.IsUsernameTaken(request.Username))
             {
-                return Conflict("User already exists.");
+                return Conflict("Username is already taken.");
             }
+
+            if (_userRepository.IsEmailTaken(request.Email))
+            {
+                return Conflict("Email is already in use.");
+            }
+
+            var hashedPassword = PasswordUtility.HashPassword(request.Password);
 
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Username = request.Username,
                 Email = request.Email,
-                Password = request.Password,
+                Password = hashedPassword,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -57,7 +64,7 @@ namespace ExpenseTrackerBackend.Controllers
         public IActionResult Login([FromBody] UserLoginRequest request)
         {
             var user = _userRepository.GetUserByUsername(request.Username);
-            if (user == null || user.Password != request.Password)
+            if (user == null || !PasswordUtility.VerifyPassword(request.Password, user.Password))
             {
                 return Unauthorized("Invalid username or password.");
             }

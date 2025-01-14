@@ -32,7 +32,7 @@ namespace ExpenseTrackerBackend.Utilities
             var tokenDescriptor = new JwtSecurityToken(
                 issuer: _issuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: credentials
             );
 
