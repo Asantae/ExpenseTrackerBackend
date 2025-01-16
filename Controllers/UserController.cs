@@ -3,7 +3,6 @@ using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Repositories;
 using ExpenseTrackerBackend.Utilities;
 using DotNetEnv;
-using System;
 
 namespace ExpenseTrackerBackend.Controllers
 {
@@ -19,8 +18,8 @@ namespace ExpenseTrackerBackend.Controllers
             Env.Load();
             string connectionString = Env.GetString("CONNECTION_STRING");
 
-            string secretKey = config.GetSection("Appsettings:SecretKey").Value;
-            string issuer = config.GetSection("Appsettings:Issuer").Value;
+            string secretKey = config.GetSection("Jwt:SecretKey").Value;
+            string issuer = config.GetSection("Jwt:Issuer").Value;
             _jwtTokenGenerator = new JwtTokenGenerator(secretKey, issuer);
 
             _userRepository = new UserRepository(connectionString);

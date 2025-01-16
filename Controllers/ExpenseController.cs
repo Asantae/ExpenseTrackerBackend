@@ -1,4 +1,6 @@
 using DotNetEnv;
+using ExpenseTrackerBackend.Models;
+using ExpenseTrackerBackend.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SQLite;
 
@@ -9,6 +11,7 @@ namespace ExpenseTrackerBackend.Controllers;
 public class ExpenseController : ControllerBase
 {
     private string connectionString;
+    private readonly ExpenseRepository _expenseRepository;
 
     public ExpenseController()
     {
@@ -83,6 +86,29 @@ public class ExpenseController : ControllerBase
             connection.Close();
             return Ok(expense);
         }
+    }
+
+    [HttpPost("addExpense")]
+    public IActionResult AddExpense([FromBody] Expense expense)
+    {
+        if (string.IsNullOrWhiteSpace(expense.UserId.ToString()))
+        {
+            return BadRequest("Couldn't get userId");
+        }
+
+        var newExpense = new Expense
+        {
+            Id = Guid.NewGuid(),
+            Amount = expense.Amount,
+            Description = expense.Description ?? "",
+            CategoryId = expense.CategoryId,
+            Frequency = expense.Frequency,
+            Date = DateTime.UtcNow
+        };
+
+        _expenseRepository.AddExpense(newExpense);
+
+        return Ok(new { Message = "Successfully added a new expense", UserId = expense.UserId});
     }
 
     [HttpGet("checkTables")]
