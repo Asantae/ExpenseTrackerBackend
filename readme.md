@@ -45,7 +45,7 @@ cd ExpenseTrackerBackend
 Ensure the expense_tracker.db file is located in the Data folder. If you don’t have the database, run the update_schema.sql script found in the dbUpdater folder to set up the necessary tables.
 
 3. Set Up the Connection String
-In the .env file, add the following line to specify the database connection string:
+In the .appsettings.json file, add the following line to specify the database connection string:
 
 makefile
 Copy code

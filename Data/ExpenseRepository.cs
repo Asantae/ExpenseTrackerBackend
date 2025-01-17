@@ -1,5 +1,3 @@
-using System.Data.SQLite;
-using Dapper;
 using ExpenseTrackerBackend.Models;
 using Microsoft.Data.Sqlite;
 

@@ -44,3 +44,11 @@ CREATE TABLE Expenses (
     FOREIGN KEY (userId) REFERENCES Users(id),
     FOREIGN KEY (frequencyId) REFERENCES Frequency(id)
 );
+
+CREATE TABLE RefreshTokens (
+    id TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    expiresAt DATETIME NOT NULL,
+    isRevoked BOOLEAN NOT NULL DEFAULT 0
+);
