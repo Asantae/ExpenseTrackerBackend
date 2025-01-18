@@ -1,9 +1,8 @@
 using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Repositories;
+using ExpenseTrackerBackend.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.SQLite;
-using System.Security.Claims;
 
 namespace ExpenseTrackerBackend.Controllers;
 
@@ -12,12 +11,13 @@ namespace ExpenseTrackerBackend.Controllers;
 [Authorize]
 public class ExpenseController : ControllerBase
 {
-    private readonly string connectionString;
+    private readonly string _connectionString;
     private readonly ExpenseRepository _expenseRepository;
 
     public ExpenseController(ExpenseRepository expenseRepository, IConfiguration configuration)
     {
-        connectionString = configuration.GetConnectionString("DefaultConnection");
+        _connectionString = configuration.GetConnectionString("DefaultConnection");
+        _expenseRepository = expenseRepository;
     }
     
     // [HttpGet("testConnection")]
@@ -37,70 +37,61 @@ public class ExpenseController : ControllerBase
     //     }
     // }
 
-    [HttpGet("testAuth")]
-    public IActionResult TestAuth()
-    {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    // [HttpGet("testAuth")]
+    // public IActionResult TestAuth()
+    // {
+    //     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userId == null)
+    //     if (userId == null)
+    //     {
+    //         return Unauthorized("Invalid token.");
+    //     }
+
+    //     return Ok(new { Message = "Token is valid!", UserId = userId });
+    // }
+
+    [HttpGet("getCategories")]
+    public IActionResult GetCategories([FromQuery] string userId)
+    {
+        if (!Guid.TryParse(userId, out var parsedUserId))
         {
-            return Unauthorized("Invalid token.");
+            return BadRequest(new { Message = "Invalid userId format." });
         }
 
-        return Ok(new { Message = "Token is valid!", UserId = userId });
+        var categories = _expenseRepository.GetCategoriesByUserId(parsedUserId);
+
+        return Ok(new { Message = "Successfully retrieved categories", Categories = categories });
     }
 
-    [HttpGet("categories")]
-    public IActionResult GetCategories()
+    [HttpGet("getExpenses")]
+    public IActionResult GetExpense([FromQuery] string userId)
     {
-        using (var connection = new SQLiteConnection(connectionString))
+        if(!Guid.TryParse(userId, out var parsedUserId))
         {
-            connection.Open();
-            string query = "SELECT id, name FROM categories";
-            var command = new SQLiteCommand(query, connection);
-            var reader = command.ExecuteReader();
-            
-            var categories = new List<object>();
-            while (reader.Read())
-            {
-                categories.Add(new
-                {
-                    Id = reader["id"],
-                    Name = reader["name"]
-                });
-            }
-
-            connection.Close();
-            return Ok(categories);
+            return BadRequest(new { Message = "Invalid userId format." });
         }
+
+        var expenses = _expenseRepository.GetExpensesByUserId(parsedUserId);
+
+        return Ok(new { Message = "Successfully retrieved expenses", Expenses = expenses });
     }
 
-    [HttpGet("expense")]
-    public IActionResult GetExpense()
-    {
-        using (var connection = new SQLiteConnection(connectionString))
-        {
-            connection.Open();
-            string query = "SELECT id, amount, description, date FROM expenses";
-            var command = new SQLiteCommand(query, connection);
-            var reader = command.ExecuteReader();
-            
-            var expense = new List<object>();
-            while (reader.Read())
-            {
-                expense.Add(new
-                {
-                    Id = reader["id"],
-                    Amount = reader["amount"],
-                    Description = reader["description"],
-                    Date = reader["date"]
-                });
-            }
+    // [HttpPost("addCategories")]
+    // public IActionResult AddCategory([FromBody] Category category)
+    // {
+    //     var newcategory = new Category
+    //     {
+    //         Id = category.Id,
+    //         Name = category.Name,
+    //         IsDefault = false,
+    //         CreatedBy = category.CreatedBy,
+    //     };
 
-            connection.Close();
-            return Ok(expense);
-        }
-    }
+    //     _expenseUtility.AddCategory(newCategory);
+
+    //     return Ok(new { Message = "Successfully added a new category", Category = category});
+    // }
+
 
     [HttpPost("addExpense")]
     public IActionResult AddExpense([FromBody] Expense expense)
@@ -112,12 +103,13 @@ public class ExpenseController : ControllerBase
 
         var newExpense = new Expense
         {
-            Id = Guid.NewGuid(),
+            Id = expense.Id,
             Amount = expense.Amount,
             Description = expense.Description ?? "",
             CategoryId = expense.CategoryId,
             Frequency = expense.Frequency,
-            Date = DateTime.UtcNow
+            Date = DateTime.UtcNow,
+            UserId = expense.UserId,
         };
 
         _expenseRepository.AddExpense(newExpense);
