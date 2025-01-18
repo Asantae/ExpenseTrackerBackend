@@ -120,4 +120,32 @@ public class JwtTokenUtility
             command.ExecuteNonQuery();
         }
     }
+
+    public string GetUserIdFromToken(string token)
+    {
+         if (string.IsNullOrEmpty(token))
+    {
+        throw new ArgumentException("Token cannot be null or empty", nameof(token));
+    }
+
+    try
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var jwtToken = tokenHandler.ReadJwtToken(token);
+
+        var userId = jwtToken.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new Exception("User ID claim not found in token");
+        }
+
+        return userId;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Failed to extract user ID from token", ex);
+    }
+    }
 }

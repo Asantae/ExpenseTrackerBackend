@@ -79,6 +79,20 @@ public class UserController : ControllerBase
         return Ok(new { Message = "Login successful.", Token = token, RefreshToken = refreshToken });
     }
 
+    [HttpPost("logout")]
+    public IActionResult Logout([FromBody] UserLogoutRequest request)
+    {
+        var userId = _jwtTokenUtility.GetUserIdFromToken(request.RefreshToken);
+        
+        if (userId != null)
+        {
+            _jwtTokenUtility.RevokeRefreshToken(request.RefreshToken);
+            return Ok(new { message = "Logout successful" });
+        }
+
+        return BadRequest(new { error = "Invalid refresh token" });
+    }
+
     [HttpGet("guest")]
     public IActionResult Guest()
     {
