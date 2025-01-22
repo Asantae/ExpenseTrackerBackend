@@ -31,6 +31,9 @@ public class UserController : ControllerBase
     [HttpPost("register")]
     public IActionResult Register([FromBody] UserRegistrationRequest request)
     {
+        request.Email = request.Email.ToLower();
+        request.Username = request.Username.ToLower();
+
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.Email))
         {
             return BadRequest("Username, Password, and Email are required");
@@ -57,17 +60,26 @@ public class UserController : ControllerBase
             CreatedAt = DateTime.UtcNow
         };
 
+        var userWithoutPassword = new 
+        {
+            user.Id,
+            user.Username,
+            user.Email,
+        };
+
         var token = _jwtTokenUtility.GenerateToken(user.Id.ToString());
         var refreshToken = _jwtTokenUtility.GenerateNewRefreshToken(user.Id.ToString());
 
         _userRepository.AddUser(user);
 
-        return Ok(new { Message = "User registered successfully", UserId = user.Id, Token = token, RefreshToken = refreshToken });
+        return Ok(new { Message = "User registered successfully", User = user, Token = token, RefreshToken = refreshToken });
     }
 
     [HttpPost("login")]
     public IActionResult Login([FromBody] UserLoginRequest request)
     {
+        request.Username = request.Username.ToLower();
+
         var user = _userRepository.GetUserByUsername(request.Username);
         if (user == null || !PasswordUtility.VerifyPassword(request.Password, user.Password))
         {
@@ -77,7 +89,14 @@ public class UserController : ControllerBase
         var token = _jwtTokenUtility.GenerateToken(user.Id.ToString());
         var refreshToken = _jwtTokenUtility.GenerateNewRefreshToken(user.Id.ToString());
 
-        return Ok(new { Message = "Login successful", Token = token, RefreshToken = refreshToken });
+        var userWithoutPassword = new 
+        {
+            user.Id,
+            user.Username,
+            user.Email,
+        };
+
+        return Ok(new { Message = "Login successful", User = userWithoutPassword, Token = token, RefreshToken = refreshToken });
     }
 
     [HttpPost("logout")]

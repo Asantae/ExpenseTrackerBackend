@@ -1,3 +1,4 @@
+using ExpenseTrackerBackend.Enums;
 using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Repositories;
 using ExpenseTrackerBackend.Utilities;
@@ -50,6 +51,20 @@ public class ExpenseController : ControllerBase
     //     return Ok(new { Message = "Token is valid!", UserId = userId });
     // }
 
+    [HttpGet("getFrequencies")]
+    public IActionResult GetFrequencies()
+    {
+        var frequencies = Enum.GetValues(typeof(Frequency))
+            .Cast<Frequency>()
+            .Select(f => new
+            {
+                Id = (int)f,
+                Value = f.ToString()
+            });
+
+        return Ok(new { Message = "Successfully retrieved frequencies", Frequencies = frequencies });
+    }
+
     [HttpGet("getCategories")]
     public IActionResult GetCategories([FromQuery] string userId)
     {
@@ -87,33 +102,32 @@ public class ExpenseController : ControllerBase
     //         CreatedBy = category.CreatedBy,
     //     };
 
-    //     _expenseUtility.AddCategory(newCategory);
+    //     _expenseRepository.AddCategory(newCategory);
 
     //     return Ok(new { Message = "Successfully added a new category", Category = category});
     // }
 
-
     [HttpPost("addExpense")]
     public IActionResult AddExpense([FromBody] Expense expense)
     {
-        if (string.IsNullOrWhiteSpace(expense.UserId.ToString()))
+        if (string.IsNullOrWhiteSpace(expense.CreatedBy.ToString()))
         {
             return BadRequest("Couldn't get userId");
         }
 
         var newExpense = new Expense
         {
-            Id = expense.Id,
+            Id = Guid.NewGuid(),
             Amount = expense.Amount,
-            Description = expense.Description ?? "",
+            Description = expense.Description,
             CategoryId = expense.CategoryId,
             Frequency = expense.Frequency,
             Date = DateTime.UtcNow,
-            UserId = expense.UserId,
+            CreatedBy = expense.CreatedBy,
         };
 
         _expenseRepository.AddExpense(newExpense);
 
-        return Ok(new { Message = "Successfully added a new expense", UserId = expense.UserId});
+        return Ok(new { Message = "Successfully added a new expense", Expense = newExpense });
     }
 }
