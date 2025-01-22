@@ -7,7 +7,7 @@ CREATE TABLE Users (
 );
 
 CREATE TABLE Categories (
-    id INTEGER PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     isDefault BOOLEAN NOT NULL DEFAULT 0,
     createdBy TEXT NULL,
@@ -15,11 +15,11 @@ CREATE TABLE Categories (
 );
 
 INSERT INTO Categories (id, name, isDefault) VALUES
-    (1, 'Housing', 1),
-    (2, 'Transportation', 1),
-    (3, 'Food', 1),
-    (4, 'Entertainment', 1),
-    (5, 'Healthcare', 1);
+    ('00000000-0000-0000-0000-000000000000', 'Housing', 1),
+    ('00000000-0000-0000-0000-000000000000', 'Transportation', 1),
+    ('00000000-0000-0000-0000-000000000000', 'Food', 1),
+    ('00000000-0000-0000-0000-000000000000', 'Entertainment', 1),
+    ('00000000-0000-0000-0000-000000000000', 'Healthcare', 1);
 
 CREATE TABLE Frequency (
     id INTEGER PRIMARY KEY,

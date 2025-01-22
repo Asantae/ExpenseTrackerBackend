@@ -91,21 +91,26 @@ public class ExpenseController : ControllerBase
         return Ok(new { Message = "Successfully retrieved expenses", Expenses = expenses });
     }
 
-    // [HttpPost("addCategories")]
-    // public IActionResult AddCategory([FromBody] Category category)
-    // {
-    //     var newcategory = new Category
-    //     {
-    //         Id = category.Id,
-    //         Name = category.Name,
-    //         IsDefault = false,
-    //         CreatedBy = category.CreatedBy,
-    //     };
+    [HttpPost("addCategories")]
+    public IActionResult AddCategory([FromBody] Models.Category category, string userId)
+    {
+        if(!Guid.TryParse(userId, out var parsedUserId))
+        {
+            return BadRequest(new { Message = "Invalid userId format." });
+        }
 
-    //     _expenseRepository.AddCategory(newCategory);
+        var newCategory = new Models.Category
+        {
+            Id = Guid.NewGuid(),
+            Name = category.Name,
+            IsDefault = false,
+            CreatedBy = parsedUserId,
+        };
 
-    //     return Ok(new { Message = "Successfully added a new category", Category = category});
-    // }
+        _expenseRepository.AddCategory(newCategory);
+
+        return Ok(new { Message = "Successfully added a new category", Category = category});
+    }
 
     [HttpPost("addExpense")]
     public IActionResult AddExpense([FromBody] Expense expense)

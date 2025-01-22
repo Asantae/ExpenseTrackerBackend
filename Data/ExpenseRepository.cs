@@ -88,7 +88,9 @@ namespace ExpenseTrackerBackend.Repositories
                     {
                         categories.Add(new Models.Category
                         {
-                            Id = Convert.ToInt32(reader["id"]),
+                            Id = Guid.TryParse(reader["id"]?.ToString(), out var id) 
+                                ? id 
+                                : Guid.Empty,
                             Name = reader["name"].ToString(),
                             IsDefault = Convert.ToBoolean(reader["isDefault"]),
                             CreatedBy = Guid.TryParse(reader["createdBy"]?.ToString(), out var createdByGuid) 
@@ -100,6 +102,25 @@ namespace ExpenseTrackerBackend.Repositories
             }
 
             return categories;
+        }
+
+        public void AddCategory(Models.Category category)
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                    INSERT INTO Categories (id, name, isDefault, createdBy)
+                    VALUES (@id, @name, @isDefault, @createdBy)";
+                
+                command.Parameters.AddWithValue("@id", category.Id);
+                command.Parameters.AddWithValue("@name", category.Name);
+                command.Parameters.AddWithValue("@isDefault", category.IsDefault);
+                command.Parameters.AddWithValue("@createdBy", category.CreatedBy);
+
+                command.ExecuteNonQuery();
+            }
         }
     }
 }
