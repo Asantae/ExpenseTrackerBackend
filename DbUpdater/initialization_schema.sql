@@ -14,12 +14,12 @@ CREATE TABLE Categories (
     FOREIGN KEY (createdBy) REFERENCES Users(id)
 );
 
-INSERT INTO Categories (id, name, isDefault) VALUES
-    ('00000000-0000-0000-0000-000000000000', 'Housing', 1),
-    ('00000000-0000-0000-0000-000000000000', 'Transportation', 1),
-    ('00000000-0000-0000-0000-000000000000', 'Food', 1),
-    ('00000000-0000-0000-0000-000000000000', 'Entertainment', 1),
-    ('00000000-0000-0000-0000-000000000000', 'Healthcare', 1);
+INSERT INTO Categories (id, name, isDefault, createdBy) VALUES
+    ('00000000-0000-0000-0000-000000000000', 'Housing', 1, null),
+    ('00000000-0000-0000-0000-000000000001', 'Transportation', 1, null),
+    ('00000000-0000-0000-0000-000000000002', 'Food', 1, null),
+    ('00000000-0000-0000-0000-000000000003', 'Entertainment', 1, null),
+    ('00000000-0000-0000-0000-000000000004', 'Healthcare', 1, null);
 
 CREATE TABLE Frequency (
     id INTEGER PRIMARY KEY,

@@ -68,12 +68,12 @@ public class ExpenseController : ControllerBase
     [HttpGet("getCategories")]
     public IActionResult GetCategories([FromQuery] string userId)
     {
-        if (!Guid.TryParse(userId, out var parsedUserId))
+        if (!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
 
-        var categories = _expenseRepository.GetCategoriesByUserId(parsedUserId);
+        var categories = _expenseRepository.GetCategoriesByUserId(userId);
 
         return Ok(new { Message = "Successfully retrieved categories", Categories = categories });
     }
@@ -91,20 +91,20 @@ public class ExpenseController : ControllerBase
         return Ok(new { Message = "Successfully retrieved expenses", Expenses = expenses });
     }
 
-    [HttpPost("addCategories")]
-    public IActionResult AddCategory([FromBody] Models.Category category, string userId)
+    [HttpPost("addCategory")]
+    public IActionResult AddCategory([FromBody] Models.Category category, [FromQuery] string userId)
     {
-        if(!Guid.TryParse(userId, out var parsedUserId))
+        if(!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
 
         var newCategory = new Models.Category
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.NewGuid().ToString(),
             Name = category.Name,
             IsDefault = false,
-            CreatedBy = parsedUserId,
+            CreatedBy = userId,
         };
 
         _expenseRepository.AddCategory(newCategory);

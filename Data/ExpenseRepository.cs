@@ -68,9 +68,59 @@ namespace ExpenseTrackerBackend.Repositories
             return expenses;
         }
 
-        public List<Models.Category> GetCategoriesByUserId(Guid userId)
+        // public List<Models.Category> GetCategoriesByUserId(Guid userId)
+        // {
+        //     userId.ToString();
+        //     var categories = new List<Models.Category>();
+
+        //     using (var connection = new SqliteConnection(_connectionString))
+        //     {
+        //         connection.Open();
+        //         var command = connection.CreateCommand();
+        //         command.CommandText = @"
+        //             SELECT id, name, isDefault, CreatedBy
+        //             FROM Categories
+        //             WHERE (createdBy = @userId) OR (isDefault = 1)";
+        //         command.Parameters.AddWithValue("@userId", userId);
+
+        //         using (var reader = command.ExecuteReader())
+        //         {
+        //             while (reader.Read())
+        //             {
+        //                 categories.Add(new Models.Category
+        //                 {
+        //                     Id = Guid.TryParse(reader["id"]?.ToString(), out var id) 
+        //                         ? id 
+        //                         : Guid.Empty,
+        //                     Name = reader["name"].ToString(),
+        //                     IsDefault = Convert.ToBoolean(reader["isDefault"]),
+        //                     CreatedBy = Guid.TryParse(reader["createdBy"]?.ToString(), out var createdByGuid) 
+        //                         ? createdByGuid 
+        //                         : Guid.Empty,
+        //                 });
+        //             }
+        //         }
+        //     }
+
+        //     return categories;
+        // }
+
+        public List<Models.Category> GetCategoriesByUserId(string userId)
         {
             var categories = new List<Models.Category>();
+
+            var defaultCategories = GetDefaultCategories();
+            categories.AddRange(defaultCategories);
+
+            var userCategories = GetUserCategories(userId);
+            categories.AddRange(userCategories);
+
+            return categories;
+        }
+
+        private Models.Category[] GetDefaultCategories()
+        {
+            var defaultCategories = new List<Models.Category>();
 
             using (var connection = new SqliteConnection(_connectionString))
             {
@@ -79,37 +129,72 @@ namespace ExpenseTrackerBackend.Repositories
                 command.CommandText = @"
                     SELECT id, name, isDefault, CreatedBy
                     FROM Categories
-                    WHERE createdBy = @userId OR isDefault = 1";
+                    WHERE isDefault = 1";
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        defaultCategories.Add(new Models.Category
+                        {
+                            Id = reader["id"]?.ToString(),
+                            Name = reader["name"].ToString(),
+                            IsDefault = Convert.ToBoolean(reader["isDefault"]),
+                            CreatedBy = reader["createdBy"]?.ToString(),
+                        });
+                    }
+                }
+            }
+
+            return defaultCategories.ToArray();
+        }
+
+        private Models.Category[] GetUserCategories(string userId)
+        {
+            var userCategories = new List<Models.Category>();
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                    SELECT id, name, isDefault, CreatedBy
+                    FROM Categories
+                    WHERE createdBy = @userId";
                 command.Parameters.AddWithValue("@userId", userId);
 
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        categories.Add(new Models.Category
+                        userCategories.Add(new Models.Category
                         {
-                            Id = Guid.TryParse(reader["id"]?.ToString(), out var id) 
-                                ? id 
-                                : Guid.Empty,
+                            Id = reader["id"]?.ToString(),
                             Name = reader["name"].ToString(),
                             IsDefault = Convert.ToBoolean(reader["isDefault"]),
-                            CreatedBy = Guid.TryParse(reader["createdBy"]?.ToString(), out var createdByGuid) 
-                                ? createdByGuid 
-                                : Guid.Empty,
+                            CreatedBy = reader["createdBy"]?.ToString(),
                         });
                     }
                 }
             }
 
-            return categories;
+            return userCategories.ToArray(); 
         }
+
 
         public void AddCategory(Models.Category category)
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
+
+                // Enabling foreign key enforcement for SQLite, which is disabled by default
                 var command = connection.CreateCommand();
+                command.CommandText = "PRAGMA foreign_keys = ON;";
+                command.ExecuteNonQuery();
+
+                CheckUser(category.CreatedBy.ToString());
+        
                 command.CommandText = @"
                     INSERT INTO Categories (id, name, isDefault, createdBy)
                     VALUES (@id, @name, @isDefault, @createdBy)";
@@ -117,9 +202,27 @@ namespace ExpenseTrackerBackend.Repositories
                 command.Parameters.AddWithValue("@id", category.Id);
                 command.Parameters.AddWithValue("@name", category.Name);
                 command.Parameters.AddWithValue("@isDefault", category.IsDefault);
-                command.Parameters.AddWithValue("@createdBy", category.CreatedBy);
+                command.Parameters.AddWithValue("@createdBy", category.CreatedBy.ToString());
 
                 command.ExecuteNonQuery();
+            }
+        }
+
+        private void CheckUser(string userId)
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                var checkUserCommand = connection.CreateCommand();
+                checkUserCommand.CommandText = "SELECT COUNT(1) FROM Users WHERE id = @userId";
+                checkUserCommand.Parameters.AddWithValue("@userId", userId);
+                
+                var userExists = (long)checkUserCommand.ExecuteScalar() > 0;
+                if (!userExists)
+                {
+                    throw new Exception($"User with ID {userId} does not exist.");
+                }
             }
         }
     }
