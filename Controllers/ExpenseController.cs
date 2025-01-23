@@ -15,9 +15,9 @@ public class ExpenseController : ControllerBase
     private readonly string _connectionString;
     private readonly ExpenseRepository _expenseRepository;
 
-    public ExpenseController(ExpenseRepository expenseRepository, IConfiguration configuration)
+    public ExpenseController(ExpenseRepository expenseRepository, IConfiguration config)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection");
+        _connectionString = config.GetConnectionString("DefaultConnection");
         _expenseRepository = expenseRepository;
     }
     
@@ -81,12 +81,12 @@ public class ExpenseController : ControllerBase
     [HttpGet("getExpenses")]
     public IActionResult GetExpense([FromQuery] string userId)
     {
-        if(!Guid.TryParse(userId, out var parsedUserId))
+        if(!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
 
-        var expenses = _expenseRepository.GetExpensesByUserId(parsedUserId);
+        var expenses = _expenseRepository.GetExpensesByUserId(userId);
 
         return Ok(new { Message = "Successfully retrieved expenses", Expenses = expenses });
     }
@@ -113,22 +113,27 @@ public class ExpenseController : ControllerBase
     }
 
     [HttpPost("addExpense")]
-    public IActionResult AddExpense([FromBody] Expense expense)
+    public IActionResult AddExpense([FromBody] Expense expense, [FromQuery] string userId)
     {
-        if (string.IsNullOrWhiteSpace(expense.CreatedBy.ToString()))
+        if (string.IsNullOrWhiteSpace(userId))
         {
             return BadRequest("Couldn't get userId");
         }
 
+        if(!Guid.TryParse(userId, out var _))
+        {
+            return BadRequest(new { Message = "Invalid userId format." });
+        }
+
         var newExpense = new Expense
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.NewGuid().ToString(),
             Amount = expense.Amount,
             Description = expense.Description,
             CategoryId = expense.CategoryId,
             Frequency = expense.Frequency,
             Date = DateTime.UtcNow,
-            CreatedBy = expense.CreatedBy,
+            CreatedBy = userId,
         };
 
         _expenseRepository.AddExpense(newExpense);

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj": {}
+    "C:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj": {}
   },
   "projects": {
-    "c:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj": {
+    "C:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj",
+        "projectUniqueName": "C:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj",
         "projectName": "ExpenseTrackerBackend",
-        "projectPath": "c:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj",
+        "projectPath": "C:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\ExpenseTrackerBackend.csproj",
         "packagesPath": "C:\\Users\\Asantae\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\obj\\",
+        "outputPath": "C:\\Users\\Asantae\\Desktop\\dev\\ExpenseTrackerBackend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Asantae\\AppData\\Roaming\\NuGet\\NuGet.Config"

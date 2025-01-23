@@ -8,7 +8,7 @@ CREATE TABLE Users (
 
 CREATE TABLE Categories (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
     isDefault BOOLEAN NOT NULL DEFAULT 0,
     createdBy TEXT NULL,
     FOREIGN KEY (createdBy) REFERENCES Users(id)
@@ -27,10 +27,11 @@ CREATE TABLE Frequency (
 );
 
 INSERT INTO Frequency (id, name) VALUES
-    (0, 'Daily'),
-    (1, 'Weekly'),
-    (2, 'Semi-Monthly'),
-    (3, 'Monthly');
+    (0, 'One-Time'),
+    (1, 'Daily'),
+    (2, 'Weekly'),
+    (3, 'Semi-Monthly'),
+    (4, 'Monthly');
 
 CREATE TABLE Expenses (
     id TEXT PRIMARY KEY,
@@ -39,7 +40,7 @@ CREATE TABLE Expenses (
     categoryId INTEGER NOT NULL,
     userId TEXT NOT NULL,
     frequencyId INTEGER NOT NULL,
-    date TEXT NOT NULL,
+    createdDate TEXT NOT NULL,
     FOREIGN KEY (categoryId) REFERENCES Categories(id),
     FOREIGN KEY (userId) REFERENCES Users(id),
     FOREIGN KEY (frequencyId) REFERENCES Frequency(id)
