@@ -1,7 +1,6 @@
 using ExpenseTrackerBackend.Enums;
 using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Repositories;
-using ExpenseTrackerBackend.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -109,7 +108,7 @@ public class ExpenseController : ControllerBase
 
         _expenseRepository.AddCategory(newCategory);
 
-        return Ok(new { Message = "Successfully added a new category", Category = category});
+        return Ok(new { Message = "Successfully added a new category", Category = newCategory });
     }
 
     [HttpPost("addExpense")]
