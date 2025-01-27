@@ -19,16 +19,30 @@ bash
 Copy code
 ExpenseTrackerBackend/
 ├── Controllers/
+│   ├── AuthController.cs
 │   ├── ExpenseController.cs
 │   └── UserController.cs
-├── Models/
-│   ├── Expense.cs
-│   ├── Category.cs
-│   └── User.cs
 ├── Data/
-│   └── expense_tracker.db
-├── dbUpdater/
-│   └── update_schema.sql
+│   └── ExpenseRepository.cs
+│   └── UserRepository.cs
+├── dbFiles/
+│   └── initialization_schema.sql
+├── Enums/
+│   └── CategoryEnum.cs
+│   └── FrequencyEnum.cs
+├── Models/
+│   ├── Category.cs
+│   ├── Expense.cs
+│   ├── RefreshTokenRequest.cs
+│   ├── User.cs
+│   ├── UserLoginRequest.cs
+│   └── UserRegistrationRequest.cs
+├── Utilities/
+│   ├── ExpensesUtility.cs
+│   ├── JwtTokenUtility.cs
+│   ├── PasswordUtility.cs
+│   └── UserUtility.cs
+├── expense_tracker.db
 ├── Program.cs
 ├── appsettings.json
 ├── .env
