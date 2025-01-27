@@ -31,6 +31,34 @@ public class UserRepository
         command.ExecuteNonQuery();
     }
 
+    public void AddGuest(User user)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            UPDATE Users
+            SET username = @username,
+                password = @password,
+                email = @email,
+                created_at = @createdAt
+            WHERE id = @id";
+
+        command.Parameters.AddWithValue("@id", user.Id.ToString());
+        command.Parameters.AddWithValue("@username", user.Username);
+        command.Parameters.AddWithValue("@password", user.Password);
+        command.Parameters.AddWithValue("@email", user.Email);
+        command.Parameters.AddWithValue("@createdAt", user.CreatedAt);
+
+        int rowsAffected = command.ExecuteNonQuery();
+
+        if (rowsAffected == 0)
+        {
+            throw new Exception($"User with ID {user.Id} not found.");
+        }
+    }
+
     public User GetUserByUsername(string username)
     {
         using var connection = new SqliteConnection(_connectionString);

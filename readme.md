@@ -23,12 +23,12 @@ ExpenseTrackerBackend/
 │   ├── ExpenseController.cs
 │   └── UserController.cs
 ├── Data/
-│   └── ExpenseRepository.cs
+│   ├── ExpenseRepository.cs
 │   └── UserRepository.cs
 ├── dbFiles/
 │   └── initialization_schema.sql
 ├── Enums/
-│   └── CategoryEnum.cs
+│   ├── CategoryEnum.cs
 │   └── FrequencyEnum.cs
 ├── Models/
 │   ├── Category.cs
