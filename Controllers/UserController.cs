@@ -86,7 +86,7 @@ public class UserController : ControllerBase
             return BadRequest("Username, Password, and Email are required");
         }
 
-        if (string.IsNullOrWhiteSpace(request.UserId))
+        if (string.IsNullOrWhiteSpace(userId))
         {
             return BadRequest("Guest user must have a valid user id");
         }
@@ -176,7 +176,7 @@ public class UserController : ControllerBase
         var guest = new User
         {
             Id = newGuid,
-            Username = "guest" + uniquePart,
+            Username = "Guest" + uniquePart,
             Email = $"guest_{uniquePart}@example.com",
             Password = hashedPassword,
             CreatedAt = DateTime.UtcNow
@@ -193,7 +193,7 @@ public class UserController : ControllerBase
         var token = _jwtTokenUtility.GenerateToken(guest.Id.ToString());
         var refreshToken = _jwtTokenUtility.GenerateNewRefreshToken(guest.Id.ToString());
 
-        return Ok(new { Message = "Logged in as guest", Token = token, RefreshToken = refreshToken, Guest = guestWithoutPassword });
+        return Ok(new { Message = "Logged in as guest", Token = token, RefreshToken = refreshToken, User = guestWithoutPassword });
     }
 
     [HttpGet("getUser")]
