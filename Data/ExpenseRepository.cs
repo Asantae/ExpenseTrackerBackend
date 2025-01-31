@@ -1,5 +1,6 @@
 using ExpenseTrackerBackend.Enums;
 using ExpenseTrackerBackend.Models;
+using ExpenseTrackerBackend.Dtos;
 using Microsoft.Data.Sqlite;
 
 namespace ExpenseTrackerBackend.Repositories
@@ -34,30 +35,54 @@ namespace ExpenseTrackerBackend.Repositories
             command.ExecuteNonQuery();
         }
 
-        public List<Expense> GetExpensesByUserId(string userId)
+        public string GetCategoryNameById(string categoryId)
         {
-            var expenses = new List<Expense>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT name 
+                FROM Categories 
+                WHERE id = @categoryId";
+            command.Parameters.AddWithValue("@categoryId", categoryId);
+
+            return command.ExecuteScalar()?.ToString();
+        }
+
+        public List<ExpenseWithCategoryDto> GetExpensesByUserId(string userId)
+        {
+            var expenses = new List<ExpenseWithCategoryDto>();
 
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                    SELECT id, amount, description, categoryId, frequencyId, createdDate
+                    SELECT 
+                        Expenses.id, 
+                        Expenses.amount, 
+                        Expenses.description, 
+                        Expenses.categoryId, 
+                        Categories.name AS categoryName, 
+                        Expenses.frequencyId, 
+                        Expenses.createdDate
                     FROM Expenses
-                    WHERE userId = @userId";
+                    INNER JOIN Categories ON Expenses.categoryId = Categories.id
+                    WHERE Expenses.userId = @userId";
                 command.Parameters.AddWithValue("@userId", userId);
 
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        expenses.Add(new Expense
+                        expenses.Add(new ExpenseWithCategoryDto
                         {
                             Id = reader["id"]?.ToString(),
                             Amount = Convert.ToDecimal(reader["amount"]),
                             Description = reader["description"].ToString(),
                             CategoryId = reader["categoryId"].ToString(),
+                            CategoryName = reader["categoryName"].ToString(),
                             Frequency = (Frequency)(int)(long)reader["frequencyId"],
                             Date = DateTime.Parse(reader["createdDate"].ToString())
                         });
@@ -67,6 +92,7 @@ namespace ExpenseTrackerBackend.Repositories
 
             return expenses;
         }
+
 
         public List<Models.Category> GetCategoriesByUserId(string userId)
         {

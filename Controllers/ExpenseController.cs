@@ -1,3 +1,4 @@
+using ExpenseTrackerBackend.Dtos;
 using ExpenseTrackerBackend.Enums;
 using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Repositories;
@@ -137,6 +138,23 @@ public class ExpenseController : ControllerBase
 
         _expenseRepository.AddExpense(newExpense);
 
-        return Ok(new { Message = "Successfully added a new expense", Expense = newExpense });
+        var categoryName = _expenseRepository.GetCategoryNameById(newExpense.CategoryId);
+        if (string.IsNullOrWhiteSpace(categoryName))
+        {
+            return NotFound(new { Message = $"Category not found with CategoryId: {newExpense.CategoryId}." });
+        }
+
+        var expenseWithCategoryName = new ExpenseWithCategoryDto
+        {
+            Id = newExpense.Id,
+            Amount = newExpense.Amount,
+            Description = newExpense.Description,
+            CategoryId = newExpense.CategoryId,
+            CategoryName = categoryName,
+            Frequency = newExpense.Frequency,
+            Date = newExpense.Date
+        };
+
+        return Ok(new { Message = "Successfully added a new expense", Expense = expenseWithCategoryName });
     }
 }
