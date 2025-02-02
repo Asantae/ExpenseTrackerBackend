@@ -1,11 +1,11 @@
 Expense Tracker Backend
-This is the backend API for the Expense Tracker project. It is built using ASP.NET Core and SQLite for managing expense data. The API is designed to interact with a frontend application, supporting various functionalities such as expense management, category management, and user management.
+This is the backend API for the Expense Tracker project. It is built using ASP.NET Core and SQLite to manage expense data. The API is designed to interact with a front-end application, supporting various functionalities such as expense management, category management, and user management.
 
 Features
 RESTful API endpoints for managing expense data, categories, and users.
 SQLite database integration.
-Support for CRUD operations on expenses and categories.
-User authentication setup for future login feature.
+Support for CRUD operations on expenses.
+User authentication for login feature.
 Ability to assign categories and link expenses to users.
 Use of GUIDs for unique identifiers.
 Environment configuration using a .env file for sensitive data like connection strings.
