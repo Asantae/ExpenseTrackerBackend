@@ -75,7 +75,7 @@ public class UserController : ControllerBase
         return Ok(new { Message = "User registered successfully", User = user, Token = token, RefreshToken = refreshToken });
     }
 
-    [HttpPost("registerGuest")]
+    [HttpPatch("registerGuest")]
     public IActionResult RegisterGuest([FromBody] UserRegistrationRequest request, [FromQuery] string userId)
     {
         request.Email = request.Email.ToLower();

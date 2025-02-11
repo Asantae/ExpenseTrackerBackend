@@ -20,36 +20,6 @@ public class ExpenseController : ControllerBase
         _connectionString = config.GetConnectionString("DefaultConnection");
         _expenseRepository = expenseRepository;
     }
-    
-    // [HttpGet("testConnection")]
-    // public IActionResult TestConnection()
-    // {
-    //     try
-    //     {
-    //         using (var connection = new SQLiteConnection(connectionString))
-    //         {
-    //             connection.Open();
-    //             return Ok("Connection successful!");
-    //         }
-    //     }
-    //     catch (SQLiteException ex)
-    //     {
-    //         return StatusCode(500, $"Error connecting to database: {ex.Message}");
-    //     }
-    // }
-
-    // [HttpGet("testAuth")]
-    // public IActionResult TestAuth()
-    // {
-    //     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-    //     if (userId == null)
-    //     {
-    //         return Unauthorized("Invalid token.");
-    //     }
-
-    //     return Ok(new { Message = "Token is valid!", UserId = userId });
-    // }
 
     [HttpGet("getFrequencies")]
     public IActionResult GetFrequencies()
@@ -156,5 +126,64 @@ public class ExpenseController : ControllerBase
         };
 
         return Ok(new { Message = "Successfully added a new expense", Expense = expenseWithCategoryName });
+    }
+
+    [HttpPatch("editExpense")]
+    public IActionResult EditExpense([FromBody] Expense updatedExpense, [FromQuery] string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return BadRequest("Couldn't get userId");
+        }
+
+        if(!Guid.TryParse(userId, out var _))
+        {
+            return BadRequest(new { Message = "Invalid userId format." });
+        }
+
+        if(!Guid.TryParse(updatedExpense.Id, out var _))
+        {
+            return BadRequest(new { Mesage = "Invalid expense id." });
+        }
+
+        _expenseRepository.UpdateExpense(updatedExpense);
+
+        var categoryName = _expenseRepository.GetCategoryNameById(updatedExpense.CategoryId);
+        if (string.IsNullOrWhiteSpace(categoryName))
+        {
+            return NotFound(new { Message = $"Category not found with CategoryId: {updatedExpense.CategoryId}." });
+        }
+
+        var expenseWithCategoryName = new ExpenseWithCategoryDto
+        {
+            Id = updatedExpense.Id,
+            Amount = updatedExpense.Amount,
+            Description = updatedExpense.Description,
+            CategoryId = updatedExpense.CategoryId,
+            CategoryName = categoryName,
+            Frequency = updatedExpense.Frequency,
+            Date = updatedExpense.Date
+        };
+
+        return Ok(new { Message = "Successfully added a new expense", Expense = expenseWithCategoryName });
+    }
+
+    [HttpDelete("deleteExpenses")]
+    public IActionResult DeleteExpenses([FromQuery] string expenseIds, [FromQuery] string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return BadRequest("Couldn't get userId");
+        }
+
+        if(!Guid.TryParse(userId, out var _))
+        {
+            return BadRequest(new { Message = "Invalid userId format." });
+        }
+
+        var expenseIdList = expenseIds.Split(',').ToList();
+        _expenseRepository.DeleteExpenses(expenseIdList);
+
+        return Ok(new { Message = $"Successfully deleted {expenseIdList.Count()} expense(s)", deletedExpenses = expenseIdList });
     }
 }

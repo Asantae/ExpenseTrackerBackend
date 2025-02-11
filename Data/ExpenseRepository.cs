@@ -2,6 +2,7 @@ using ExpenseTrackerBackend.Enums;
 using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Dtos;
 using Microsoft.Data.Sqlite;
+using Microsoft.VisualBasic;
 
 namespace ExpenseTrackerBackend.Repositories
 {
@@ -31,6 +32,49 @@ namespace ExpenseTrackerBackend.Repositories
             command.Parameters.AddWithValue("@categoryId", expense.CategoryId.ToString());
             command.Parameters.AddWithValue("@frequencyId", frequencyId);
             command.Parameters.AddWithValue("@createdDate", expense.Date);
+
+            command.ExecuteNonQuery();
+        }
+
+        public void UpdateExpense(Expense expense)
+        {
+            int frequencyId = (int)expense.Frequency;
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                UPDATE Expenses
+                SET 
+                    amount = @amount,
+                    description = @description,
+                    categoryId = @categoryId,
+                    frequencyId = @frequencyId
+                WHERE id = @id";
+
+            command.Parameters.AddWithValue("@id", expense.Id.ToString());
+            command.Parameters.AddWithValue("@amount", expense.Amount.ToString());
+            command.Parameters.AddWithValue("@description", expense.Description.ToString());
+            command.Parameters.AddWithValue("@categoryId", expense.CategoryId.ToString());
+            command.Parameters.AddWithValue("@frequencyId", frequencyId);
+
+            command.ExecuteNonQuery();
+        }
+
+        public void DeleteExpenses(List<string> expenseIds)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+
+            var command = connection.CreateCommand();
+
+            var idPlaceholders = string.Join(", ", expenseIds.Select((_, i) => $"@id{i}"));
+            command.CommandText = $"DELETE FROM Expenses WHERE id IN ({idPlaceholders})";
+
+            for (int i = 0; i < expenseIds.Count; i++)
+            {
+                command.Parameters.AddWithValue($"@id{i}", expenseIds[i]);
+            }
 
             command.ExecuteNonQuery();
         }
