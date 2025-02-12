@@ -21,6 +21,7 @@ var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
 var refreshTokenSecretKey = builder.Configuration["Jwt:RefreshTokenSecretKey"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var corsAllowedOrigins = builder.Configuration["Cors:AllowedOrigins"]?.Split(',');
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -41,7 +42,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") 
+        policy.WithOrigins(
+            "http://localhost:3000",
+            "https://asantaes-expense-tracker.netlify.app"
+        ) 
               .AllowAnyHeader()                     
               .AllowAnyMethod() 
               .AllowCredentials();                
