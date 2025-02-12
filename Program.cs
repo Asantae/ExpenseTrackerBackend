@@ -21,6 +21,7 @@ var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
 var refreshTokenSecretKey = builder.Configuration["Jwt:RefreshTokenSecretKey"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"Connection String: {connectionString}");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
