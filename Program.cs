@@ -5,8 +5,17 @@ using ExpenseTrackerBackend.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+Log.Information("Starting Expense Tracker Backend...");
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -21,7 +30,6 @@ var jwtSecretKey = builder.Configuration["Jwt:SecretKey"];
 var refreshTokenSecretKey = builder.Configuration["Jwt:RefreshTokenSecretKey"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"Connection String: {connectionString}");
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -54,7 +62,14 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<ExpenseRepository>(provider =>
 {
-    return new ExpenseRepository(connectionString);
+    var logger = provider.GetRequiredService<ILogger<ExpenseRepository>>();
+    return new ExpenseRepository(connectionString, logger);
+});
+
+builder.Services.AddScoped<UserRepository>(provider =>
+{
+    var logger = provider.GetRequiredService<ILogger<UserRepository>>();
+    return new UserRepository(connectionString, logger);
 });
 
 builder.Services.AddSingleton<JwtTokenUtility>(provider =>
@@ -73,6 +88,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 

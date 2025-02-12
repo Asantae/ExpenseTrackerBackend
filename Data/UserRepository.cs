@@ -2,19 +2,23 @@ using System.Data.SQLite;
 using Dapper;
 using ExpenseTrackerBackend.Models;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTrackerBackend.Repositories;
 public class UserRepository
 {
     private readonly string _connectionString;
+    private readonly ILogger<UserRepository> _logger;
 
-    public UserRepository(string connectionString)
+    public UserRepository(string connectionString, ILogger<UserRepository> logger)
     {
         _connectionString = connectionString;
+        _logger = logger;
     }
 
     public void AddUser(User user)
     {
+        _logger.LogInformation("AddUser called for UserId: {UserId}, Username: {Username}", user.Id, user.Username);
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
@@ -33,6 +37,7 @@ public class UserRepository
 
     public void AddGuest(User user)
     {
+        _logger.LogInformation("AddGuest called for UserId: {UserId}, Username: {Username}", user.Id, user.Username);
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
@@ -61,6 +66,7 @@ public class UserRepository
 
     public User GetUserByUsername(string username)
     {
+        _logger.LogInformation("GetUserByUsername called for Username: {Username}", username);
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
@@ -89,6 +95,7 @@ public class UserRepository
 
     public User GetUserById(string id)
     {
+        _logger.LogInformation("GetUserById called for Id: {Id}", id);
         using (var connection = new SQLiteConnection(_connectionString))
         {
             connection.Open();
@@ -116,6 +123,7 @@ public class UserRepository
 
     public bool IsUsernameTaken(string username)
     {
+        _logger.LogInformation("IsUsernameTaken called for Username: {Username}", username);
         using (var connection = new SQLiteConnection(_connectionString))
         {
             connection.Open();
@@ -130,6 +138,7 @@ public class UserRepository
 
     public bool IsEmailTaken(string email)
     {
+        _logger.LogInformation("IsEmailTaken called for Email: {Email}", email);
         using (var connection = new SQLiteConnection(_connectionString))
         {
             connection.Open();
@@ -138,5 +147,4 @@ public class UserRepository
             return result > 0;
         }
     }
-
 }

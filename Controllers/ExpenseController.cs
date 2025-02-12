@@ -4,6 +4,7 @@ using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTrackerBackend.Controllers;
 
@@ -14,16 +15,19 @@ public class ExpenseController : ControllerBase
 {
     private readonly string _connectionString;
     private readonly ExpenseRepository _expenseRepository;
+    private readonly ILogger<ExpenseController> _logger;
 
-    public ExpenseController(ExpenseRepository expenseRepository, IConfiguration config)
+    public ExpenseController(ExpenseRepository expenseRepository, IConfiguration config, ILogger<ExpenseController> logger)
     {
         _connectionString = config.GetConnectionString("DefaultConnection");
         _expenseRepository = expenseRepository;
+        _logger = logger;
     }
 
     [HttpGet("getFrequencies")]
     public IActionResult GetFrequencies()
     {
+        _logger.LogInformation("GetFrequencies request received.");
         var frequencies = Enum.GetValues(typeof(Frequency))
             .Cast<Frequency>()
             .Select(f => new
@@ -38,6 +42,7 @@ public class ExpenseController : ControllerBase
     [HttpGet("getCategories")]
     public IActionResult GetCategories([FromQuery] string userId)
     {
+        _logger.LogInformation("GetCategories request received for userId: {UserId}", userId);
         if (!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
@@ -51,7 +56,8 @@ public class ExpenseController : ControllerBase
     [HttpGet("getExpenses")]
     public IActionResult GetExpense([FromQuery] string userId)
     {
-        if(!Guid.TryParse(userId, out var _))
+        _logger.LogInformation("GetExpenses request received for userId: {UserId}", userId);
+        if (!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
@@ -64,7 +70,8 @@ public class ExpenseController : ControllerBase
     [HttpPost("addCategory")]
     public IActionResult AddCategory([FromBody] Models.Category category, [FromQuery] string userId)
     {
-        if(!Guid.TryParse(userId, out var _))
+        _logger.LogInformation("AddCategory request received for userId: {UserId} with category name: {CategoryName}", userId, category.Name);
+        if (!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
@@ -85,12 +92,13 @@ public class ExpenseController : ControllerBase
     [HttpPost("addExpense")]
     public IActionResult AddExpense([FromBody] Expense expense, [FromQuery] string userId)
     {
+        _logger.LogInformation("AddExpense request received for userId: {UserId} with expense amount: {Amount}", userId, expense.Amount);
         if (string.IsNullOrWhiteSpace(userId))
         {
             return BadRequest("Couldn't get userId");
         }
 
-        if(!Guid.TryParse(userId, out var _))
+        if (!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
@@ -131,17 +139,18 @@ public class ExpenseController : ControllerBase
     [HttpPatch("editExpense")]
     public IActionResult EditExpense([FromBody] Expense updatedExpense, [FromQuery] string userId)
     {
+        _logger.LogInformation("EditExpense request received for userId: {UserId} with expense id: {ExpenseId}", userId, updatedExpense.Id);
         if (string.IsNullOrWhiteSpace(userId))
         {
             return BadRequest("Couldn't get userId");
         }
 
-        if(!Guid.TryParse(userId, out var _))
+        if (!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
 
-        if(!Guid.TryParse(updatedExpense.Id, out var _))
+        if (!Guid.TryParse(updatedExpense.Id, out var _))
         {
             return BadRequest(new { Mesage = "Invalid expense id." });
         }
@@ -171,12 +180,13 @@ public class ExpenseController : ControllerBase
     [HttpDelete("deleteExpenses")]
     public IActionResult DeleteExpenses([FromQuery] string expenseIds, [FromQuery] string userId)
     {
+        _logger.LogInformation("DeleteExpenses request received for userId: {UserId} with expenseIds: {ExpenseIds}", userId, expenseIds);
         if (string.IsNullOrWhiteSpace(userId))
         {
             return BadRequest("Couldn't get userId");
         }
 
-        if(!Guid.TryParse(userId, out var _))
+        if (!Guid.TryParse(userId, out var _))
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }

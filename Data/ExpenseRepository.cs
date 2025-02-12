@@ -3,20 +3,24 @@ using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Dtos;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTrackerBackend.Repositories
 {
     public class ExpenseRepository
     {
         private readonly string _connectionString;
+        private readonly ILogger<ExpenseRepository> _logger;
 
-        public ExpenseRepository(string connectionString)
+        public ExpenseRepository(string connectionString, ILogger<ExpenseRepository> logger)
         {
             _connectionString = connectionString;
+            _logger = logger;
         }
 
         public void AddExpense(Expense expense)
         {
+            _logger.LogInformation("AddExpense called for ExpenseId: {ExpenseId}, CreatedBy: {CreatedBy}", expense.Id, expense.CreatedBy);
             int frequencyId = (int)expense.Frequency;
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
@@ -38,6 +42,7 @@ namespace ExpenseTrackerBackend.Repositories
 
         public void UpdateExpense(Expense expense)
         {
+            _logger.LogInformation("UpdateExpense called for ExpenseId: {ExpenseId}", expense.Id);
             int frequencyId = (int)expense.Frequency;
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
@@ -63,6 +68,7 @@ namespace ExpenseTrackerBackend.Repositories
 
         public void DeleteExpenses(List<string> expenseIds)
         {
+            _logger.LogInformation("DeleteExpenses called for ExpenseIds: {ExpenseIds}", string.Join(", ", expenseIds));
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
 
@@ -81,6 +87,7 @@ namespace ExpenseTrackerBackend.Repositories
 
         public string GetCategoryNameById(string categoryId)
         {
+            _logger.LogInformation("GetCategoryNameById called for CategoryId: {CategoryId}", categoryId);
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
 
@@ -96,6 +103,7 @@ namespace ExpenseTrackerBackend.Repositories
 
         public List<ExpenseWithCategoryDto> GetExpensesByUserId(string userId)
         {
+            _logger.LogInformation("GetExpensesByUserId called for UserId: {UserId}", userId);
             var expenses = new List<ExpenseWithCategoryDto>();
 
             using (var connection = new SqliteConnection(_connectionString))
@@ -137,9 +145,9 @@ namespace ExpenseTrackerBackend.Repositories
             return expenses;
         }
 
-
         public List<Models.Category> GetCategoriesByUserId(string userId)
         {
+            _logger.LogInformation("GetCategoriesByUserId called for UserId: {UserId}", userId);
             var categories = new List<Models.Category>();
 
             var defaultCategories = GetDefaultCategories();
@@ -153,6 +161,7 @@ namespace ExpenseTrackerBackend.Repositories
 
         private Models.Category[] GetDefaultCategories()
         {
+            _logger.LogInformation("GetDefaultCategories called.");
             var defaultCategories = new List<Models.Category>();
 
             using (var connection = new SqliteConnection(_connectionString))
@@ -184,6 +193,7 @@ namespace ExpenseTrackerBackend.Repositories
 
         private Models.Category[] GetUserCategories(string userId)
         {
+            _logger.LogInformation("GetUserCategories called for UserId: {UserId}", userId);
             var userCategories = new List<Models.Category>();
 
             using (var connection = new SqliteConnection(_connectionString))
@@ -214,9 +224,9 @@ namespace ExpenseTrackerBackend.Repositories
             return userCategories.ToArray(); 
         }
 
-
         public void AddCategory(Models.Category category)
         {
+            _logger.LogInformation("AddCategory called for CategoryId: {CategoryId}, CreatedBy: {CreatedBy}", category.Id, category.CreatedBy);
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
@@ -243,6 +253,7 @@ namespace ExpenseTrackerBackend.Repositories
 
         private void CheckUser(string userId)
         {
+            _logger.LogInformation("CheckUser called for UserId: {UserId}", userId);
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
