@@ -39,5 +39,6 @@ appsettings.*.json
 *.dll
 *.exe
 *.env
+.env
 
 publish
