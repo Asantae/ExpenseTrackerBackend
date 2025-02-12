@@ -41,7 +41,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+            "http://localhost:3000",
+            "https://asantaes-expense-tracker.netlify.app"
+        ) 
             .AllowAnyHeader()                     
             .AllowAnyMethod() 
             .AllowCredentials();                
