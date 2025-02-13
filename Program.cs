@@ -92,12 +92,12 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
-// if (app.Environment.IsDevelopment())
-// {
+if (app.Environment.IsDevelopment())
+{
     IdentityModelEventSource.ShowPII = true;
     app.UseSwagger();
     app.UseSwaggerUI();
-// }
+}
 
 app.UseSerilogRequestLogging();
 app.UseAuthentication();

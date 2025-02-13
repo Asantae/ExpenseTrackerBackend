@@ -3,6 +3,7 @@ using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Repositories;
 using ExpenseTrackerBackend.Utilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.Sqlite;
 
 namespace ExpenseTrackerBackend.Controllers;
 
@@ -31,37 +32,25 @@ public class UserController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("testConnection")]
-    public IActionResult TestDatabaseConnection()
+[HttpGet("testConnection")]
+public IActionResult TestConnection()
+{
+    try
     {
-        _logger.LogInformation("Testing SQLite database connection...");
-
-        try
+        _logger.LogInformation("Attempting SQLite connection to {DbPath}", connectionString);
+        using (var connection = new SqliteConnection(connectionString))
         {
-            using var connection = new Microsoft.Data.Sqlite.SqliteConnection(connectionString);
             connection.Open();
-
-            using var command = connection.CreateCommand();
-            command.CommandText = "SELECT 1";
-            var result = command.ExecuteScalar();
-
-            if (result != null && result.ToString() == "1")
-            {
-                _logger.LogInformation("SQLite database connection successful.");
-                return Ok(new { Message = "SQLite database connection successful." });
-            }
-            else
-            {
-                _logger.LogWarning("SQLite database connection test query did not return expected result.");
-                return StatusCode(500, new { Error = "SQLite database connection test query failed." });
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "SQLite database connection failed.");
-            return StatusCode(500, new { Error = "SQLite database connection failed.", Details = ex.Message });
+            _logger.LogInformation("SQLite database connection successful.");
+            return Ok(new { message = "SQLite database connection successful.", dbPath = connectionString });
         }
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "SQLite connection failed.");
+        return StatusCode(500, new { message = "SQLite database connection failed.", error = ex.Message });
+    }
+}
 
     [HttpPost("register")]
     public IActionResult Register([FromBody] UserRegistrationRequest request)
