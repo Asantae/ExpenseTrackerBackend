@@ -77,16 +77,27 @@ builder.Services.AddSingleton<JwtTokenUtility>(provider =>
     return new JwtTokenUtility(jwtSecretKey, refreshTokenSecretKey, jwtIssuer, connectionString);
 });
 
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.ProducesResponseTypeAttribute(500));
+});
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Debug); 
+
+builder.Host.UseSerilog();
+
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     IdentityModelEventSource.ShowPII = true;
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
 
 app.UseSerilogRequestLogging();
 app.UseAuthentication();

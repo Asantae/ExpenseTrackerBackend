@@ -31,6 +31,38 @@ public class UserController : ControllerBase
         _logger = logger;
     }
 
+    [HttpGet("testConnection")]
+    public IActionResult TestDatabaseConnection()
+    {
+        _logger.LogInformation("Testing SQLite database connection...");
+
+        try
+        {
+            using var connection = new Microsoft.Data.Sqlite.SqliteConnection(connectionString);
+            connection.Open();
+
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT 1";
+            var result = command.ExecuteScalar();
+
+            if (result != null && result.ToString() == "1")
+            {
+                _logger.LogInformation("SQLite database connection successful.");
+                return Ok(new { Message = "SQLite database connection successful." });
+            }
+            else
+            {
+                _logger.LogWarning("SQLite database connection test query did not return expected result.");
+                return StatusCode(500, new { Error = "SQLite database connection test query failed." });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SQLite database connection failed.");
+            return StatusCode(500, new { Error = "SQLite database connection failed.", Details = ex.Message });
+        }
+    }
+
     [HttpPost("register")]
     public IActionResult Register([FromBody] UserRegistrationRequest request)
     {
