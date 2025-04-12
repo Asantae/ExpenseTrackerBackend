@@ -16,9 +16,12 @@ public class UserRepository
         _logger = logger;
     }
 
-    public void AddUser(User user)
+public void AddUser(User user)
+{
+    _logger.LogInformation("AddUser called for UserId: {UserId}, Username: {Username}", user.Id, user.Username);
+    
+    try
     {
-        _logger.LogInformation("AddUser called for UserId: {UserId}, Username: {Username}", user.Id, user.Username);
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
@@ -26,6 +29,7 @@ public class UserRepository
         command.CommandText = @"
             INSERT INTO Users (id, username, password, email, created_at)
             VALUES (@id, @username, @password, @email, @createdAt)";
+        
         command.Parameters.AddWithValue("@id", user.Id.ToString());
         command.Parameters.AddWithValue("@username", user.Username);
         command.Parameters.AddWithValue("@password", user.Password);
@@ -33,7 +37,20 @@ public class UserRepository
         command.Parameters.AddWithValue("@createdAt", user.CreatedAt);
 
         command.ExecuteNonQuery();
+
+        _logger.LogInformation("User added successfully for UserId: {UserId}, Username: {Username}", user.Id, user.Username);
     }
+    catch (SqliteException ex)
+    {
+        _logger.LogError(ex, "SQLite error occurred while adding user with UserId: {UserId}, Username: {Username}", user.Id, user.Username);
+        throw; // rethrow the exception to propagate it if necessary
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred while adding user with UserId: {UserId}, Username: {Username}", user.Id, user.Username);
+        throw; // rethrow the exception to propagate it if necessary
+    }
+}
 
     public void AddGuest(User user)
     {

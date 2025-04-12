@@ -32,25 +32,59 @@ public class UserController : ControllerBase
         _logger = logger;
     }
 
-[HttpGet("testConnection")]
-public IActionResult TestConnection()
-{
-    try
+    [HttpGet("testConnection")]
+    public IActionResult TestConnection()
     {
-        _logger.LogInformation("Attempting SQLite connection to {DbPath}", connectionString);
-        using (var connection = new SqliteConnection(connectionString))
+        try
         {
-            connection.Open();
-            _logger.LogInformation("SQLite database connection successful.");
-            return Ok(new { message = "SQLite database connection successful.", dbPath = connectionString });
+            _logger.LogInformation("Attempting SQLite connection to {DbPath}", connectionString);
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                _logger.LogInformation("SQLite database connection successful.");
+                return Ok(new { message = "SQLite database connection successful.", dbPath = connectionString });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SQLite connection failed.");
+            return StatusCode(500, new { message = "SQLite database connection failed.", error = ex.Message });
         }
     }
-    catch (Exception ex)
+
+    [HttpPost("test-write")]
+    public IActionResult TestWritePermission()
     {
-        _logger.LogError(ex, "SQLite connection failed.");
-        return StatusCode(500, new { message = "SQLite database connection failed.", error = ex.Message });
+        try
+        {
+            var newGuid = Guid.NewGuid();
+            var uniquePart = newGuid.ToString().Substring(0, 8);
+
+            var hashedPassword = PasswordUtility.HashPassword("Guest");
+
+            var guest = new User
+            {
+                Id = newGuid,
+                Username = "Guest" + uniquePart,
+                Email = $"guest_{uniquePart}@example.com",
+                Password = hashedPassword,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _userRepository.AddUser(guest);
+
+            var token = _jwtTokenUtility.GenerateToken(guest.Id.ToString());
+            var refreshToken = _jwtTokenUtility.GenerateNewRefreshToken(guest.Id.ToString());
+
+            _logger.LogInformation("Guest user created with username: {Username}", guest.Username);
+
+            return Ok(new { Message = "Logged in as guest", Token = token, RefreshToken = refreshToken, User = guest });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Test failed: {ex.Message}");
+        }
     }
-}
 
     [HttpPost("register")]
     public IActionResult Register([FromBody] UserRegistrationRequest request)

@@ -8,12 +8,17 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
+    .WriteTo.Console()  // Ensure logs are written to the console for Log Stream
+    .WriteTo.File("/home/LogFiles/app_log.txt", rollingInterval: RollingInterval.Day)  // Optional file logging
     .CreateLogger();
 
 Log.Information("Starting Expense Tracker Backend...");
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 builder.Host.UseSerilog();
 
@@ -62,13 +67,13 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<ExpenseRepository>(provider =>
 {
-    var logger = provider.GetRequiredService<ILogger<ExpenseRepository>>();
+    var logger = provider.GetRequiredService<ILogger<ExpenseRepository>>(); 
     return new ExpenseRepository(connectionString, logger);
 });
 
 builder.Services.AddScoped<UserRepository>(provider =>
 {
-    var logger = provider.GetRequiredService<ILogger<UserRepository>>();
+    var logger = provider.GetRequiredService<ILogger<UserRepository>>(); 
     return new UserRepository(connectionString, logger);
 });
 
@@ -84,9 +89,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-builder.Logging.SetMinimumLevel(LogLevel.Debug); 
-
-builder.Host.UseSerilog();
+builder.Logging.SetMinimumLevel(LogLevel.Debug); // Ensure logging at Debug level
 
 var app = builder.Build();
 
@@ -99,7 +102,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging();  // Logs HTTP requests automatically
 app.UseAuthentication();
 app.UseAuthorization();
 
