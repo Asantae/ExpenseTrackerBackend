@@ -14,7 +14,7 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Information("Starting Expense Tracker Backend...");
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "80";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 
 var builder = WebApplication.CreateBuilder(args);
 

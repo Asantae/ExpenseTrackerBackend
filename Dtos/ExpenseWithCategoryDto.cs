@@ -10,6 +10,6 @@ public class ExpenseWithCategoryDto
     public decimal Amount { get; set; }
     public string Description { get; set; } = "";
     public Frequency Frequency { get; set; }
-    public DateTime Date { get; set; }
+    public DateTime? ExpenseDate { get; set; }
     public string CategoryName { get; set; }
 }

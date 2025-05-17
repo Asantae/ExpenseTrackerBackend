@@ -2,8 +2,6 @@ using ExpenseTrackerBackend.Enums;
 using ExpenseTrackerBackend.Models;
 using ExpenseTrackerBackend.Dtos;
 using Microsoft.Data.Sqlite;
-using Microsoft.VisualBasic;
-using Microsoft.Extensions.Logging;
 
 namespace ExpenseTrackerBackend.Repositories
 {
@@ -27,15 +25,20 @@ namespace ExpenseTrackerBackend.Repositories
 
             var command = connection.CreateCommand();
             command.CommandText = @"
-                INSERT INTO Expenses (id, userId, amount, description, categoryId, frequencyId, createdDate)
-                VALUES (@id, @userId, @amount, @description, @categoryId, @frequencyId, @createdDate)";
+                INSERT INTO Expenses (id, userId, amount, description, categoryId, frequencyId, expenseDate)
+                VALUES (@id, @userId, @amount, @description, @categoryId, @frequencyId, @expenseDate)";
             command.Parameters.AddWithValue("@id", expense.Id.ToString());
             command.Parameters.AddWithValue("@userId", expense.CreatedBy.ToString());
             command.Parameters.AddWithValue("@amount", expense.Amount.ToString());
             command.Parameters.AddWithValue("@description", expense.Description.ToString());
             command.Parameters.AddWithValue("@categoryId", expense.CategoryId.ToString());
             command.Parameters.AddWithValue("@frequencyId", frequencyId);
-            command.Parameters.AddWithValue("@createdDate", expense.Date);
+            command.Parameters.AddWithValue(
+                "@expenseDate",
+                expense.ExpenseDate.HasValue 
+                    ? (object)expense.ExpenseDate.Value 
+                    : DBNull.Value
+            );
 
             command.ExecuteNonQuery();
         }
@@ -118,7 +121,7 @@ namespace ExpenseTrackerBackend.Repositories
                         Expenses.categoryId, 
                         Categories.name AS categoryName, 
                         Expenses.frequencyId, 
-                        Expenses.createdDate
+                        Expenses.expenseDate
                     FROM Expenses
                     INNER JOIN Categories ON Expenses.categoryId = Categories.id
                     WHERE Expenses.userId = @userId";
@@ -136,7 +139,7 @@ namespace ExpenseTrackerBackend.Repositories
                             CategoryId = reader["categoryId"].ToString(),
                             CategoryName = reader["categoryName"].ToString(),
                             Frequency = (Frequency)(int)(long)reader["frequencyId"],
-                            Date = DateTime.Parse(reader["createdDate"].ToString())
+                            ExpenseDate = DateTime.Parse(reader["expenseDate"].ToString())
                         });
                     }
                 }

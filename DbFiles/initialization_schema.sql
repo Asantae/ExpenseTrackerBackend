@@ -40,7 +40,7 @@ CREATE TABLE Expenses (
     categoryId INTEGER NOT NULL,
     userId TEXT NOT NULL,
     frequencyId INTEGER NOT NULL,
-    createdDate TEXT NOT NULL,
+    expenseDate DATETIME NULL,
     FOREIGN KEY (categoryId) REFERENCES Categories(id),
     FOREIGN KEY (userId) REFERENCES Users(id),
     FOREIGN KEY (frequencyId) REFERENCES Frequency(id)

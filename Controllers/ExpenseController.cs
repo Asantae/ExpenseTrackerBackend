@@ -90,9 +90,9 @@ public class ExpenseController : ControllerBase
     }
 
     [HttpPost("addExpense")]
-    public IActionResult AddExpense([FromBody] Expense expense, [FromQuery] string userId)
+    public IActionResult AddExpense([FromBody] AddExpenseRequest req, [FromQuery] string userId)
     {
-        _logger.LogInformation("AddExpense request received for userId: {UserId} with expense amount: {Amount}", userId, expense.Amount);
+        _logger.LogInformation("AddExpense request received for userId: {UserId} with expense amount: {Amount}", userId, req.Amount);
         if (string.IsNullOrWhiteSpace(userId))
         {
             return BadRequest("Couldn't get userId");
@@ -102,15 +102,20 @@ public class ExpenseController : ControllerBase
         {
             return BadRequest(new { Message = "Invalid userId format." });
         }
+        
+        DateTime? dateValue = 
+            !string.IsNullOrWhiteSpace(req.Date) && DateTime.TryParse(req.Date, out var dt)
+                ? dt
+                : (DateTime?)null;
 
         var newExpense = new Expense
         {
             Id = Guid.NewGuid().ToString(),
-            Amount = expense.Amount,
-            Description = expense.Description,
-            CategoryId = expense.CategoryId,
-            Frequency = expense.Frequency,
-            Date = DateTime.UtcNow,
+            Amount = req.Amount,
+            Description = req.Description,
+            CategoryId = req.CategoryId,
+            Frequency = req.Frequency,
+            ExpenseDate = dateValue,
             CreatedBy = userId,
         };
 
@@ -130,7 +135,7 @@ public class ExpenseController : ControllerBase
             CategoryId = newExpense.CategoryId,
             CategoryName = categoryName,
             Frequency = newExpense.Frequency,
-            Date = newExpense.Date
+            ExpenseDate = newExpense.ExpenseDate
         };
 
         return Ok(new { Message = "Successfully added a new expense", Expense = expenseWithCategoryName });
@@ -171,7 +176,7 @@ public class ExpenseController : ControllerBase
             CategoryId = updatedExpense.CategoryId,
             CategoryName = categoryName,
             Frequency = updatedExpense.Frequency,
-            Date = updatedExpense.Date
+            ExpenseDate = updatedExpense.ExpenseDate
         };
 
         return Ok(new { Message = "Successfully added a new expense", Expense = expenseWithCategoryName });

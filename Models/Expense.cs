@@ -8,6 +8,6 @@ public class Expense
     public string CategoryId { get; set; }
     public decimal Amount { get; set; }
     public string Description { get; set; } = "";
-    public DateTime Date { get; set; }
+    public DateTime? ExpenseDate { get; set; }
     public Frequency Frequency { get; set; }
 }
